@@ -1,0 +1,28 @@
+steps:
+  - name: hashicorp/terraform:1.9.5
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        cd terraform
+        terraform init
+        terraform apply -auto-approve \
+          -var="project_id=${_PROJECT_ID}" \
+          -var="region=${_REGION}" \
+          -var="bucket_name=${_BUCKET_NAME}"
+
+  - name: gcr.io/cloud-builders/gsutil
+    args:
+      - -m
+      - rsync
+      - -r
+      - site
+      - gs://${_BUCKET_NAME}
+
+substitutions:
+  _PROJECT_ID: "proyecto-taller-github"
+  _REGION: "us-central1"
+  _BUCKET_NAME: "demo-web-estatica"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
